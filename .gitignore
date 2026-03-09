@@ -1,11 +1,24 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Environments
 .venv/
 venv/
 env/
+
+# Data and Logs
 *.json
 *.csv
+*.log
+
+# Configuration and Secrets
+.env
+
+# OS generated files
 .DS_Store
 Thumbs.db
-.env
+
+# VS Code settings
+.vscode/
