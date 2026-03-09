@@ -1,37 +1,46 @@
 import requests
 import json
 import time
+import os
+from dotenv import load_dotenv
+
+# Load các biến từ file .env
+load_dotenv()
 
 
 def fetch_real_estate_data(keyword, max_pages=5):
     print(f"Đang bắt đầu cào dữ liệu cho từ khóa: {keyword}...")
     all_listings = []
 
-    url = "https://gateway.chotot.com/v1/public/ad-listing"
+    url = os.getenv("CHOTOT_API_URL", "https://gateway.chotot.com/v1/public/ad-listing")
+    user_agent = os.getenv("USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "User-Agent": user_agent,
         "Accept": "application/json",
     }
-    for page in range(1, max_pages + 1):  # Cào 5 trang đầu tiên
+
+    for page in range(1, max_pages + 1):
         print(f"Đang cào trang {page}...")
         params = {
             "cg": "1000",  # Mã danh mục bất động sản
-            "q": keyword,  # Từ khóa tìm kiếm
-            "o": (page - 1) * 20,  # Vị trí bắt đầu
-            "limit": 20,  # Số tin trên mỗi trang
+            "q": keyword,
+            "o": (page - 1) * 20,
+            "limit": 20,
         }
 
         try:
             response = requests.get(url, headers=headers, params=params)
-            response.raise_for_status()  # Kiểm tra lỗi HTTP
+            response.raise_for_status()
             data = response.json()
             listings = data.get("ads", [])
+
             if not listings:
                 print("Không còn tin nào để cào.")
                 break
             all_listings.extend(listings)
 
-            time.sleep(1)  # Tạm dừng giữa các yêu cầu để tránh bị chặn
+            time.sleep(1)
         except requests.exceptions.RequestException as e:
             print(f"Lỗi khi cào dữ liệu: {e}")
             break
@@ -48,7 +57,8 @@ def save_to_json(data, filename):
 
 
 def main():
-    properties = fetch_real_estate_data(keyword="vinhomes smart city", max_pages=5)
+    search_keyword = os.getenv("SEARCH_KEYWORD", "vinhomes smart city")
+    properties = fetch_real_estate_data(keyword=search_keyword, max_pages=5)
     save_to_json(properties, "vinhomes_smart_city_listings.json")
 
 
